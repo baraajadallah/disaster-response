@@ -21,6 +21,15 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 
 def load_data(database_filepath):
+    """
+    Load and merge datasets
+    input:
+         database name
+    outputs:
+        X: messages 
+        y: everything esle
+        category names.
+    """
     engine = create_engine('sqlite:///'+database_filepath).connect()
     df = pd.read_sql_table('DisasterResponse', engine)
     
@@ -35,6 +44,8 @@ def load_data(database_filepath):
     return X, Y, category_names
     
 def tokenize(text):
+    """ Normalize and tokenize
+    """
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -52,6 +63,9 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    pipeline construction
+    """
     pipeline = Pipeline([('vect', CountVectorizer(tokenizer=tokenize)), ('tfidf', TfidfTransformer()), ('clf',                          MultiOutputClassifier(RandomForestClassifier()))]) 
     
     parameters = {
@@ -65,6 +79,15 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    inputs
+        model
+        X_test
+        y_test
+        category_names
+    output:
+        classification report
+    """
     y_pred = model.predict(X_test)
     for col in range(len(category_names)):
         print(Y_test.columns[col])
@@ -72,6 +95,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Save model to a pickle file
+    """
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 
